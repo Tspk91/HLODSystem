@@ -588,7 +588,7 @@ namespace Unity.HLODSystem
         [SerializeField] private List<SerializableMaterial> m_materials = new List<SerializableMaterial>();
         [SerializeField] private List<SerializableCollider> m_colliders = new List<SerializableCollider>();
 
-        public void AddFromWokringObjects(string name, IList<WorkingObject> woList)
+        public void AddFromWorkingObjects(string name, IList<WorkingObject> woList)
         {
             for (int i = 0; i < woList.Count; ++i)
             {
@@ -614,13 +614,18 @@ namespace Unity.HLODSystem
         }
         public void AddFromGameObject(GameObject go)
         {
+            var mr = go.GetComponent<MeshRenderer>();
+            if (mr == null)
+                return;
+
+            var mf = go.GetComponent<MeshFilter>();
+            if (mf == null || mf.sharedMesh == null)
+                return;
+
             using (WorkingObject wo = new WorkingObject(Allocator.Temp))
             {
-                var mr = go.GetComponent<MeshRenderer>();
-                if (mr == null)
-                    return;
+                wo.FromRenderer(mr, mf);
 
-                wo.FromRenderer(mr);
                 wo.Name = go.name;
 
                 SerializableObject so = new SerializableObject();

@@ -6,10 +6,10 @@ namespace Unity.HLODSystem.Utils
 {
     public static class MeshRendererExtension
     {
-        public static WorkingObject ToWorkingObject(this MeshRenderer renderer, Allocator allocator)
+        public static WorkingObject ToWorkingObject(this MeshRenderer renderer, MeshFilter filter, Allocator allocator)
         {
             WorkingObject obj = new WorkingObject(allocator);
-            obj.FromRenderer(renderer);
+            obj.FromRenderer(renderer, filter);
             return obj;
         }
     }
@@ -59,13 +59,12 @@ namespace Unity.HLODSystem.Utils
             m_lightProbeUsage = UnityEngine.Rendering.LightProbeUsage.BlendProbes;
         }
 
-        public void FromRenderer(MeshRenderer renderer)
+        public void FromRenderer(MeshRenderer renderer, MeshFilter filter)
         {
             //clean old data
             m_mesh?.Dispose();
             m_materials?.Dispose();
             
-            MeshFilter filter = renderer.GetComponent<MeshFilter>();
             if (filter != null && filter.sharedMesh != null)
             {
                 m_mesh = filter.sharedMesh.ToWorkingMesh(m_allocator);
@@ -73,7 +72,10 @@ namespace Unity.HLODSystem.Utils
 
             foreach (var mat in renderer.sharedMaterials)
             {
-                m_materials.Add(mat.ToWorkingMaterial(m_allocator));
+                if (mat != null)
+                {
+                    m_materials.Add(mat.ToWorkingMaterial(m_allocator));
+                }
             }
 
             m_localToWorld = renderer.localToWorldMatrix;

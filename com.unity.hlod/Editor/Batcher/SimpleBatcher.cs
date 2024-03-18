@@ -286,7 +286,10 @@ namespace Unity.HLODSystem
 
             for (int i = 0; i < info.WorkingObjects.Count; ++i)
             {
-                var obj = info.WorkingObjects[i]; 
+                var obj = info.WorkingObjects[i];
+                if (obj.Mesh == null)
+                    continue;
+
                 ConvertMesh(obj.Mesh, obj.Materials, atlas, textureInfoList[0].InputName);
 
                 for (int si = 0; si < obj.Mesh.subMeshCount; ++si)
@@ -597,6 +600,9 @@ namespace Unity.HLODSystem
                 var mesh = meshRenderers[m];
                 foreach (Material material in mesh.sharedMaterials)
                 {
+                    if (material == null)
+                        continue;
+
                     var names = material.GetTexturePropertyNames();
                     for (int n = 0; n < names.Length; ++n)
                     {

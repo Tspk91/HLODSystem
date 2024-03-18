@@ -128,7 +128,7 @@ namespace Unity.HLODSystem
                 var info = buildInfoCandidates[i];
                 var item = candidateItems[i];
                 var level = maxLevel - item.Level;  //< It needs to be turned upside down. The terminal node must have level 0.
-                var meshRenderers = new List<MeshRenderer>();
+                var meshRenderers = new List<(MeshRenderer, MeshFilter)>();
                 var distances = new List<int>();
                 var colliders = GetColliders(item.TargetGameObjects, minObjectSize);
 
@@ -144,7 +144,8 @@ namespace Unity.HLODSystem
                 
                 for (int mi = 0; mi < meshRenderers.Count; ++mi)
                 {
-                    info.WorkingObjects.Add(meshRenderers[mi].ToWorkingObject(Allocator.Persistent));
+                    (var mr, var mf) = meshRenderers[mi];
+                    info.WorkingObjects.Add(mr.ToWorkingObject(mf, Allocator.Persistent));
                     info.Distances.Add(distances[mi]);
                 }
 

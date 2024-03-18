@@ -12,24 +12,37 @@ namespace Unity.HLODSystem
         {
             private bool m_isCalculated = false;
             private List<HLODMeshSetter> m_meshSetters = new List<HLODMeshSetter>();
-            private List<MeshRenderer> m_meshRenderers = new List<MeshRenderer>();
+            private Dictionary<MeshRenderer, MeshFilter> m_meshRenderers = new Dictionary<MeshRenderer, MeshFilter>();
             private List<LODGroup> m_lodGroups = new List<LODGroup>();
 
-            private List<MeshRenderer> m_resultMeshRenderers = new List<MeshRenderer>();
+            private List<(MeshRenderer, MeshFilter)> m_resultMeshRenderers = new List<(MeshRenderer, MeshFilter)>();
 
-            public List<MeshRenderer> ResultMeshRenderers
+            public List<(MeshRenderer, MeshFilter)> ResultMeshRenderers
             {
                 get { return m_resultMeshRenderers; }
             }
             
             public MeshRendererCalculator(List<GameObject> targetGameObjects)
             {
+                var renderers = new List<MeshRenderer>();
+
                 for (int oi = 0; oi < targetGameObjects.Count; ++oi)
                 {
                     var target = targetGameObjects[oi];
                     
                     m_meshSetters.AddRange(target.GetComponentsInChildren<HLODMeshSetter>());
-                    m_meshRenderers.AddRange(target.GetComponentsInChildren<MeshRenderer>());
+
+                    target.GetComponentsInChildren(true, renderers);
+
+                    foreach(var renderer in renderers)
+                    {
+                        var mf = renderer.GetComponent<MeshFilter>();
+                        if(mf != null && mf.sharedMesh != null)
+                        {
+                            m_meshRenderers.Add(renderer, mf);
+                        }
+                    }
+
                     m_lodGroups.AddRange(target.GetComponentsInChildren<LODGroup>());
                 }
 
@@ -67,18 +80,16 @@ namespace Unity.HLODSystem
                         }
                     }
 
-                    AddReusltFromLODGroup(lodGroup, minObjectSize);
+                    AddResultFromLODGroup(lodGroup, minObjectSize);
                 }
 
-                for (int mi = 0; mi < m_meshRenderers.Count; ++mi)
+                foreach((MeshRenderer mr, MeshFilter mf) in m_meshRenderers)
                 {
-                    MeshRenderer mr = m_meshRenderers[mi];
-                    
                     float max = Mathf.Max(mr.bounds.size.x, mr.bounds.size.y, mr.bounds.size.z);
                     if (max < minObjectSize)
                         continue;
 
-                    m_resultMeshRenderers.Add(mr);
+                    m_resultMeshRenderers.Add((mr, mf));
                 }
 
                 m_isCalculated = true;
@@ -93,11 +104,20 @@ namespace Unity.HLODSystem
                 if (group == null)
                     return;
 
-                m_resultMeshRenderers.AddRange(group.MeshRenderers);
+                var renderers = group.MeshRenderers;
+                m_resultMeshRenderers.Capacity += renderers.Count;
+                foreach (var renderer in renderers)
+                {
+                    var mf = renderer.GetComponent<MeshFilter>();
+                    if(mf == null) 
+                        continue;
+
+                    m_resultMeshRenderers.Add((renderer, mf));
+                }
                 RemoveUnderMeshSetters(setter);
             }
 
-            private void AddReusltFromLODGroup(LODGroup lodGroup, float minObjectSize)
+            private void AddResultFromLODGroup(LODGroup lodGroup, float minObjectSize)
             {
                 LOD[] lods = lodGroup.GetLODs();
                 Renderer[] renderers = lods.Last().renderers;
@@ -115,14 +135,23 @@ namespace Unity.HLODSystem
                     if (max < minObjectSize)
                         continue;
 
-                    m_resultMeshRenderers.Add(mr);
+                    var mf = mr.GetComponent<MeshFilter>();
+
+                    if (mf == null)
+                        continue;
+
+                    m_resultMeshRenderers.Add((mr, mf));
                 }
             }
 
             private void RemoveUnderMeshSetters(HLODMeshSetter setter)
             {
                 m_lodGroups.RemoveAll(setter.GetComponentsInChildren<LODGroup>());
-                m_meshRenderers.RemoveAll(setter.GetComponentsInChildren<MeshRenderer>());
+                var renderers = setter.GetComponentsInChildren<MeshRenderer>();
+                foreach (var renderer in renderers)
+                {
+                    m_meshRenderers.Remove(renderer);
+                }
             }
 
             
@@ -158,30 +187,29 @@ namespace Unity.HLODSystem
                     i -= 1;
                 }
             }
-            private void RemoveDisabled(List<MeshRenderer> componentList)
+            private void RemoveDisabled(Dictionary<MeshRenderer, MeshFilter> meshRenderers)
             {
-                for (int i = 0; i < componentList.Count; ++i)
+                var componentList = meshRenderers.Keys.ToArray();
+                for (int i = 0; i < componentList.Length; ++i)
                 {
-                    if (componentList[i].enabled == true && componentList[i].gameObject.activeInHierarchy == true)
+                    var renderer = componentList[i];
+                    if (renderer.enabled == true && renderer.gameObject.activeInHierarchy == true)
                     {
                         continue;
                     }
 
-                    int backIndex = componentList.Count - 1;
-                    componentList[i] = componentList[backIndex];
-                    componentList.RemoveAt(backIndex);
-                    i -= 1;
+                    meshRenderers.Remove(renderer);
                 }
             }
         }
-        public static List<MeshRenderer> GetMeshRenderers(List<GameObject> gameObjects, float minObjectSize, int level)
+        public static List<(MeshRenderer, MeshFilter)> GetMeshRenderers(List<GameObject> gameObjects, float minObjectSize, int level)
         {
             MeshRendererCalculator calculator = new MeshRendererCalculator(gameObjects);
             calculator.Calculate(minObjectSize, level);
             return calculator.ResultMeshRenderers;
         }
         
-        public static List<MeshRenderer> GetMeshRenderers(GameObject gameObject, float minObjectSize, int level)
+        public static List<(MeshRenderer, MeshFilter)> GetMeshRenderers(GameObject gameObject, float minObjectSize, int level)
         {
             List<GameObject> tmpList = new List<GameObject>();
             tmpList.Add(gameObject);
