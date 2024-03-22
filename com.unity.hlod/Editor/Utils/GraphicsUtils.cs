@@ -54,6 +54,10 @@ namespace Unity.HLODSystem.Utils
         public static Shader GetDefaultShader()
         {
             string shaderName = null;
+            
+            var defaultShader = HLODEditorSettings.DefaultShader.value;
+            if (defaultShader != null)
+                return defaultShader;
 
             switch(ActiveRenderPipeline)
             {
