@@ -13,7 +13,7 @@ namespace Unity.HLODSystem
         public static class Styles
         {
             public static GUIContent GenerateButtonEnable = new GUIContent("Generate", "Generate HLOD mesh.");
-            public static GUIContent GenerateButtonExists = new GUIContent("Generate", "HLOD already generated.");
+            public static GUIContent RegenerateButtonEnable = new GUIContent("Regenerate", "Regenerate HLOD mesh.");
             public static GUIContent DestroyButtonEnable = new GUIContent("Destroy", "Destroy HLOD mesh.");
             public static GUIContent DestroyButtonNotExists = new GUIContent("Destroy", "HLOD must be created before the destroying.");
 
@@ -294,18 +294,29 @@ namespace Unity.HLODSystem
 
             if (hlod.GeneratedObjects.Count > 0 )
             {
-                generateButton = Styles.GenerateButtonExists;
+                generateButton = Styles.RegenerateButtonEnable;
                 destroyButton = Styles.DestroyButtonEnable;
             }
 
-
-
             EditorGUILayout.Space();
 
-            GUI.enabled = generateButton == Styles.GenerateButtonEnable;
-            if (GUILayout.Button(generateButton))
+            if (generateButton == Styles.GenerateButtonEnable)
             {
-                CoroutineRunner.RunCoroutine(HLODCreator.Create(hlod));
+                if (GUILayout.Button(generateButton))
+                {
+                    CoroutineRunner.RunCoroutine(HLODCreator.Create(hlod));
+                }
+            }
+            else
+            {
+                if (generateButton == Styles.RegenerateButtonEnable)
+                {
+                    if (GUILayout.Button(generateButton))
+                    {
+                        CoroutineRunner.RunCoroutine(HLODCreator.Destroy(hlod));
+                        CoroutineRunner.RunCoroutine(HLODCreator.Create(hlod));
+                    }
+                }
             }
 
             GUI.enabled = destroyButton == Styles.DestroyButtonEnable;
