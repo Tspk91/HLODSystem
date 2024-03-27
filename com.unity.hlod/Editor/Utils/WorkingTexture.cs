@@ -294,14 +294,37 @@ namespace Unity.HLODSystem.Utils
         }
         public Texture2D ToTexture()
         {
-            Texture2D texture = new Texture2D(m_width, m_height, m_format, false, m_linear);
+            Texture2D texture = new Texture2D(m_width, m_height, GetUncompressedFormat(m_format), false, m_linear);
             texture.name = Name;
             texture.SetPixels(m_pixels.ToArray());
             texture.wrapMode = m_wrapMode;
             texture.Apply();
             return texture;
         }
-        
+
+        static TextureFormat GetUncompressedFormat(TextureFormat format)
+        {
+            var channelCount = GraphicsFormatUtility.GetComponentCount(format);
+
+            switch (channelCount)
+            {
+                case 1:
+                    return TextureFormat.R8;
+                    break;
+                case 2:
+                    return TextureFormat.RG16;
+                    break;
+                case 3:
+                    return TextureFormat.RGB24;
+                    break;
+                case 4:
+                    return TextureFormat.RGBA32;
+                    break;
+            }
+
+            return TextureFormat.RGBA32;
+        }
+
         public Guid GetGUID()
         {
             return m_guid;
