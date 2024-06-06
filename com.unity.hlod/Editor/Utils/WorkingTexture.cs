@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Runtime.InteropServices;
 using Unity.Collections;
 using UnityEditor;
 using UnityEngine;
@@ -33,7 +32,7 @@ namespace Unity.HLODSystem.Utils
         }
 
         public TextureFormat Format => m_buffer.Format;
-        public int Width => m_buffer.Widht;
+        public int Width => m_buffer.Width;
 
         public int Height => m_buffer.Height;
 
@@ -47,6 +46,12 @@ namespace Unity.HLODSystem.Utils
         {
             set => m_buffer.WrapMode = value;
             get => m_buffer.WrapMode;
+        }
+
+        public bool IsNormal
+        {
+            set => m_buffer.IsNormal = value;
+            get => m_buffer.IsNormal;
         }
         
         private WorkingTexture()
@@ -140,7 +145,7 @@ namespace Unity.HLODSystem.Utils
         {
             WorkingTexture wt = new WorkingTexture(allocator, m_buffer.Format, newWidth, newHeight, m_buffer.Linear);
 
-            float xWeight = (float) (m_buffer.Widht - 1) / (float) (newWidth - 1);
+            float xWeight = (float) (m_buffer.Width - 1) / (float) (newWidth - 1);
             float yWeight = (float) (m_buffer.Height - 1) / (float) (newHeight - 1);
 
             for (int y = 0; y < newHeight; ++y)
@@ -236,7 +241,8 @@ namespace Unity.HLODSystem.Utils
         private int m_width;
         private int m_height;
         private bool m_linear;
-        
+        private bool m_isNormal;
+
         private NativeArray<Color> m_pixels;
         
         private int m_refCount;
@@ -249,12 +255,18 @@ namespace Unity.HLODSystem.Utils
         public string Name { set; get; }
 
         public TextureFormat Format => m_format;
-        public int Widht => m_width;
+        public int Width => m_width;
         public int Height => m_height;
         public bool Linear
         {
             set => m_linear = value;
             get => m_linear;
+        }
+
+        public bool IsNormal
+        {
+            set => m_isNormal = value;
+            get => m_isNormal;
         }
 
         public TextureWrapMode WrapMode

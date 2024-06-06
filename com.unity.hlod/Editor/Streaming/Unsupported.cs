@@ -232,6 +232,11 @@ namespace Unity.HLODSystem.Streaming
 
                     if (textureImporter)
                     {
+                        if(serializeTexture.IsNormal)
+                        {
+                            textureImporter.textureType = TextureImporterType.NormalMap;
+                        }
+
                         textureImporter.wrapMode = serializeTexture.WrapMode;
                         textureImporter.sRGBTexture = GraphicsFormatUtility.IsSRGBFormat(serializeTexture.GraphicsFormat);
                         textureImporter.SaveAndReimport();

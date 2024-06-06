@@ -177,7 +177,7 @@ namespace Unity.HLODSystem
 
                 textures.Add(PackingType.White, CreateEmptyTexture(4, 4, Color.white, false));
                 textures.Add(PackingType.Black, CreateEmptyTexture(4, 4, Color.black, false));
-                textures.Add(PackingType.Normal, CreateEmptyTexture(4, 4, new Color(0.5f, 0.5f, 1.0f), true));
+                textures.Add(PackingType.Normal, CreateEmptyTexture(4, 4, new Color(0.5f, 0.5f, 1.0f), true, true));
 
                 return textures;
             }
@@ -236,11 +236,12 @@ namespace Unity.HLODSystem
                     if (textureInfoList[i].Type == PackingType.Normal)
                     {
                         wt.Linear = true;
+                        wt.IsNormal = true;
                     }
 
                     textures.Add(textureInfoList[i].OutputName, wt);
                 }
-                
+
                 WorkingMaterial mat = CreateMaterial(options.MaterialGUID, textures);
                 mat.Name = "CombinedMaterial " + index;
                 m_createdMaterials.Add(atlas, mat);
@@ -369,9 +370,10 @@ namespace Unity.HLODSystem
 
 
      
-        static private WorkingTexture CreateEmptyTexture(int width, int height, Color color, bool linear)
+        static private WorkingTexture CreateEmptyTexture(int width, int height, Color color, bool linear, bool isNormal = false)
         {
             WorkingTexture texture = new WorkingTexture(Allocator.Persistent, TextureFormat.RGB24, width, height, linear);
+            texture.IsNormal = isNormal;
 
             for (int y = 0; y < height; ++y)
             {

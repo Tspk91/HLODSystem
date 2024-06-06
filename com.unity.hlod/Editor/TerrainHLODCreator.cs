@@ -94,10 +94,10 @@ namespace Unity.HLODSystem
 
                 MakeTexture(layer, layer.diffuseTexture, layer.diffuseRemapMin, layer.diffuseRemapMax, m_diffuseTextures);
                 MakeTexture(layer, layer.maskMapTexture, layer.maskMapRemapMin, layer.maskMapRemapMax, m_maskTextures);
-                MakeTexture(layer, layer.normalMapTexture, Vector4.zero, Vector4.one, m_normalTextures);
+                MakeTexture(layer, layer.normalMapTexture, Vector4.zero, Vector4.one, m_normalTextures, true);
             }
 
-            void MakeTexture(TerrainLayer layer, Texture2D texture, Vector4 min, Vector4 max, DisposableList<WorkingTexture> results)
+            void MakeTexture(TerrainLayer layer, Texture2D texture, Vector4 min, Vector4 max, DisposableList<WorkingTexture> results, bool isNormal = false)
             {
                 bool linear = !GraphicsFormatUtility.IsSRGBFormat(texture.graphicsFormat);
 
@@ -136,6 +136,7 @@ namespace Unity.HLODSystem
                         int width = texture.width >> i;
                         int height = texture.height >> i;
                         WorkingTexture workingTexture = new WorkingTexture(Allocator.Persistent, texture.format, width, height, linear);
+                        workingTexture.IsNormal = isNormal;
                         Color[] colors = texture.GetPixels(i);
                         for (int y = 0; y < height; ++y)
                         {
@@ -239,6 +240,7 @@ namespace Unity.HLODSystem
                 
                 WorkingTexture mipmap = new WorkingTexture(Allocator.Persistent, source.Format, sx, sy, source.Linear);
                 mipmap.Name = source.Name;
+                mipmap.IsNormal = source.IsNormal;
 
                 for (int y = 0; y < sy; ++y)
                 {
@@ -574,6 +576,7 @@ namespace Unity.HLODSystem
             WorkingTexture normalTexture = new WorkingTexture(Allocator.Persistent, TextureFormat.RGB24, resolution, resolution, true);
             normalTexture.Name = name + "_Normal";
             normalTexture.WrapMode = TextureWrapMode.Clamp;
+            normalTexture.IsNormal = true;
 
             EnqueueBlendTextureJob(normalTexture, bounds, resolution, (layer, wx, wz, sx, sz, linear) =>
             {

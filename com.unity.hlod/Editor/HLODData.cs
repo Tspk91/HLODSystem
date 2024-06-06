@@ -153,6 +153,7 @@ namespace Unity.HLODSystem
             [SerializeField] private int m_width;
             [SerializeField] private int m_height;
             [SerializeField] private byte[] m_bytes;
+            [SerializeField] private bool m_isNormal;
 
             public string Name
             {
@@ -192,6 +193,12 @@ namespace Unity.HLODSystem
                         return 0;
                     return m_bytes.Length; 
                 }
+            }
+
+            public bool IsNormal
+            {
+                get { return m_isNormal; }
+                set { m_isNormal = value; }
             }
 
             public void From(Texture2D texture)
@@ -653,6 +660,7 @@ namespace Unity.HLODSystem
                         SerializableTexture st = new SerializableTexture();
                         st.From(tex.ToTexture());
                         st.Name = textureNames[ti];
+                        st.IsNormal = tex.IsNormal;
 
                         sm.AddTexture(st);
                     }
@@ -688,6 +696,7 @@ namespace Unity.HLODSystem
                     SerializableTexture st = new SerializableTexture();
                     st.From(wt.ToTexture());
                     st.Name = textureNames[ti];
+                    st.IsNormal = wt.IsNormal;
 
                     sm.AddTexture(st);
                 }
