@@ -322,16 +322,12 @@ namespace Unity.HLODSystem.Utils
             {
                 case 1:
                     return TextureFormat.R8;
-                    break;
                 case 2:
                     return TextureFormat.RG16;
-                    break;
                 case 3:
                     return TextureFormat.RGB24;
-                    break;
                 case 4:
                     return TextureFormat.RGBA32;
-                    break;
             }
 
             return TextureFormat.RGBA32;

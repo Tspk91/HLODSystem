@@ -21,9 +21,12 @@ namespace Unity.HLODSystem
             }
         }
 
-        [UserSetting("Simple Batcher","Default Shader")]
+        [UserSetting("Simple Batcher","Default Shader", "A value of null equals the value of Preferences/HLOD/Default Shader.")]
         public static UserSetting<Shader> DefaultShader = new UserSetting<Shader>(instance, "DefaultShader", null, SettingsScope.Project);
         
+        [UserSetting("Simple Batcher","Default Material Mapping", "Default Material Mapping used by HLOD Components")]
+        public static UserSetting<MaterialMapping> DefaultMaterialMapping = new UserSetting<MaterialMapping>(instance, "DefaultMaterialMapping", null, SettingsScope.Project);
+
         static class HLODEditorSettingsProvider
         {
             const string k_PreferencesPath = "Preferences/HLOD";
