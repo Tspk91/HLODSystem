@@ -62,12 +62,12 @@ namespace Unity.HLODSystem
             private bool m_enableTintColor;
             private string m_tintColorName;
             
-            public MaterialTextureCache(dynamic options)
+            public MaterialTextureCache(MaterialMapping mapping)
             {
                 m_defaultTextures = CreateDefaultTextures();
-                m_enableTintColor = options.EnableTintColor;
-                m_tintColorName = options.TintColorName;
-                m_textureInfoList = options.TextureInfoList;
+                m_enableTintColor = mapping.EnableTintColor;
+                m_tintColorName = mapping.TintColorName;
+                m_textureInfoList = mapping.TextureInfoList;
                 m_textureCache = new DisposableDictionary<string, TexturePacker.MaterialTexture>();
             }
             public TexturePacker.MaterialTexture GetMaterialTextures(WorkingMaterial material)
@@ -189,8 +189,14 @@ namespace Unity.HLODSystem
 
         private void PackingTexture(TexturePacker packer, DisposableList<HLODBuildInfo> targets, dynamic options, Action<float> onProgress)
         { 
-            List<TextureInfo> textureInfoList = options.TextureInfoList;
-            using (MaterialTextureCache cache = new MaterialTextureCache(options))
+            MaterialMapping materialMapping = options.MaterialMapping;
+            // Resolve material mapping
+            if (materialMapping == null)
+            {
+                materialMapping = HLODEditorSettings.DefaultMaterialMapping;
+            }
+            List<TextureInfo> textureInfoList = materialMapping.TextureInfoList;
+            using (MaterialTextureCache cache = new MaterialTextureCache(materialMapping))
             {
                 for (int i = 0; i < targets.Count; ++i)
                 {
@@ -374,8 +380,6 @@ namespace Unity.HLODSystem
             mesh.uv = uv;
         }
 
-
-     
         static private WorkingTexture CreateEmptyTexture(int width, int height, Color color, bool linear, bool isNormal = false)
         {
             WorkingTexture texture = new WorkingTexture(Allocator.Persistent, TextureFormat.RGB24, width, height, linear);
@@ -405,7 +409,6 @@ namespace Unity.HLODSystem
                 32, 64, 128, 256, 512, 1024
             };
             public static string[] LimitTextureSizeNames;
-
 
             static Styles()
             {
