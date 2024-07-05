@@ -59,7 +59,7 @@ namespace Unity.HLODSystem
             return propertyNames;
         }
         
-        public void DrawGUI(HLOD hlod)
+        public void DrawGUI(HLOD hlod, ref bool textureSlotFoldout)
         {
             Shader = (Shader)EditorGUILayout.ObjectField(new GUIContent("Shader", "A value of null equals the current render pipeline's default shader."), Shader, typeof(Shader), false);
                 
@@ -114,92 +114,95 @@ namespace Unity.HLODSystem
             }
             
             EditorGUILayout.Space();
-            EditorGUILayout.LabelField("Textures");
-            EditorGUI.indentLevel += 1;
-            EditorGUILayout.BeginHorizontal();
-            EditorGUILayout.SelectableLabel("Output", GUILayout.MinWidth(90));
-            EditorGUILayout.SelectableLabel("Input", GUILayout.MinWidth(90));
-            EditorGUILayout.SelectableLabel("Default Color", GUILayout.MinWidth(140));
-            EditorGUILayout.LabelField("");
-            EditorGUILayout.EndHorizontal();
-
-            for (int infoIdx = 0; infoIdx < TextureInfoList.Count; ++infoIdx)
+            textureSlotFoldout = EditorGUILayout.Foldout(textureSlotFoldout, "Textures");
+            if (textureSlotFoldout)
             {
-                TextureInfo info = TextureInfoList[infoIdx];
-
-                EditorGUILayout.BeginVertical();
-                
+                EditorGUI.indentLevel += 1;
                 EditorGUILayout.BeginHorizontal();
-                info.OutputName = GUIUtils.StringPopup(info.OutputName, outputTexturePropertyNames);
-                
-                info.Type = (PackingType)EditorGUILayout.EnumPopup(info.Type);
-                
-                if (GUILayout.Button("x") == true)
-                {
-                    TextureInfoList.RemoveAt(infoIdx);
-                    infoIdx -= 1;
-                }
-                
+                EditorGUILayout.SelectableLabel("Output");
+                EditorGUILayout.SelectableLabel("Inputs");
+                EditorGUILayout.SelectableLabel("Default Color");
                 EditorGUILayout.EndHorizontal();
 
-                for (var inputIdx = 0; inputIdx < info.InputNames.Count; ++inputIdx)
+                for (int infoIdx = 0; infoIdx < TextureInfoList.Count; ++infoIdx)
                 {
+                    TextureInfo info = TextureInfoList[infoIdx];
+
+                    EditorGUILayout.BeginVertical();
+
                     EditorGUILayout.BeginHorizontal();
-                    EditorGUILayout.PrefixLabel(" ");
-                    if (inputTexturePropertyNames == null)
-                    {
-                        info.InputNames[inputIdx] = EditorGUILayout.TextField(info.InputNames[inputIdx]);
-                    }
-                    else
-                    {
-                        info.InputNames[inputIdx] = GUIUtils.StringPopup(info.InputNames[inputIdx], inputTexturePropertyNames);
-                    }
+                    info.OutputName = GUIUtils.StringPopup(info.OutputName, outputTexturePropertyNames);
 
-                    if (info.InputNames.Count <= 1)
-                        GUI.enabled = false;
-                    if (GUILayout.Button("x") == true)
-                    {
-                        info.InputNames.RemoveAt(inputIdx);
-                        inputIdx -= 1;
-                    }
-                    GUI.enabled = true;
+                    info.Type = (PackingType)EditorGUILayout.EnumPopup(info.Type);
 
-                    if(inputIdx != info.InputNames.Count - 1)
-                        GUI.enabled = false;
-                    if (GUILayout.Button("+") == true)
+                    GUILayout.Space(20);
+                    if (GUILayout.Button("x", GUILayout.Width(20)) == true)
                     {
-                        var defaultName = inputTexturePropertyNames != null ? inputTexturePropertyNames[0] : "";
-                        info.InputNames.Add(defaultName);
+                        TextureInfoList.RemoveAt(infoIdx);
+                        infoIdx -= 1;
                     }
-                    GUI.enabled = true;
 
                     EditorGUILayout.EndHorizontal();
+
+                    for (var inputIdx = 0; inputIdx < info.InputNames.Count; ++inputIdx)
+                    {
+                        EditorGUILayout.BeginHorizontal();
+                        EditorGUILayout.PrefixLabel(" ");
+                        if (inputTexturePropertyNames == null)
+                        {
+                            info.InputNames[inputIdx] = EditorGUILayout.TextField(info.InputNames[inputIdx]);
+                        }
+                        else
+                        {
+                            info.InputNames[inputIdx] = GUIUtils.StringPopup(info.InputNames[inputIdx], inputTexturePropertyNames);
+                        }
+
+                        if (info.InputNames.Count <= 1)
+                            GUI.enabled = false;
+                        if (GUILayout.Button("x", GUILayout.Width(20)) == true)
+                        {
+                            info.InputNames.RemoveAt(inputIdx);
+                            inputIdx -= 1;
+                        }
+                        GUI.enabled = true;
+
+                        if (inputIdx != info.InputNames.Count - 1)
+                            GUI.enabled = false;
+                        if (GUILayout.Button("+", GUILayout.Width(20)) == true)
+                        {
+                            var defaultName = inputTexturePropertyNames != null ? inputTexturePropertyNames[0] : "";
+                            info.InputNames.Add(defaultName);
+                        }
+                        GUI.enabled = true;
+
+                        EditorGUILayout.EndHorizontal();
+                    }
+
+                    GUIUtils.DrawHorizontalGUILine(60);
+                    EditorGUILayout.EndVertical();
                 }
 
-                GUIUtils.DrawHorizontalGUILine(60);
-                EditorGUILayout.EndVertical();
+                EditorGUILayout.BeginHorizontal();
+                EditorGUILayout.PrefixLabel(" ");
+                if (GUILayout.Button("Add new texture property") == true)
+                {
+                    TextureInfoList.Add(new TextureInfo());
+                }
+
+                EditorGUILayout.EndHorizontal();
+
+                EditorGUILayout.BeginHorizontal();
+                EditorGUILayout.PrefixLabel(" ");
+                if (GUILayout.Button("Update texture properties"))
+                {
+                    //TODO: Need update automatically
+                    inputTexturePropertyNames = null;
+                    outputTexturePropertyNames = null;
+                }
+                EditorGUILayout.EndHorizontal();
+
+                EditorGUI.indentLevel -= 1;
             }
-
-            EditorGUILayout.BeginHorizontal();
-            EditorGUILayout.PrefixLabel(" ");
-            if (GUILayout.Button("Add new texture property") == true)
-            {
-                TextureInfoList.Add(new TextureInfo());
-            }
-
-            EditorGUILayout.EndHorizontal();
-
-            EditorGUILayout.BeginHorizontal();
-            EditorGUILayout.PrefixLabel(" ");
-            if (GUILayout.Button("Update texture properties"))
-            {
-                //TODO: Need update automatically
-                inputTexturePropertyNames = null;
-                outputTexturePropertyNames = null;
-            }
-            EditorGUILayout.EndHorizontal();
-
-            EditorGUI.indentLevel -= 1;
         }
     }
     

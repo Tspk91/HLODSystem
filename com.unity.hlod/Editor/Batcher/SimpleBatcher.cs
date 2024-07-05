@@ -432,6 +432,10 @@ namespace Unity.HLODSystem
             EditorGUI.indentLevel += 1;
             dynamic batcherOptions = hlod.BatcherOptions;
 
+            // UI only
+            if (batcherOptions.textureSlotFoldout == null)
+                batcherOptions.textureSlotFoldout = false;
+
             if (batcherOptions.PackTextureSize == null)
                 batcherOptions.PackTextureSize = 1024;
             if (batcherOptions.LimitTextureSize == null)
@@ -508,7 +512,9 @@ namespace Unity.HLODSystem
                 }
                 else
                 {
-                    materialMapping.DrawGUI(hlod);
+                    bool textureSlotFoldout = batcherOptions.textureSlotFoldout;
+                    materialMapping.DrawGUI(hlod, ref textureSlotFoldout);
+                    batcherOptions.textureSlotFoldout = textureSlotFoldout;
                 }
             }
 
