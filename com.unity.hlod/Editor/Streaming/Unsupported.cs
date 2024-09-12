@@ -364,15 +364,15 @@ namespace Unity.HLODSystem.Streaming
             }
             if (options.AndroidCompression == null)
             {
-                options.AndroidCompression = TextureFormat.ETC2_RGBA8;
+                options.AndroidCompression = TextureFormat.ASTC_6x6;
             }
             if (options.iOSCompression== null)
             {
-                options.iOSCompression = TextureFormat.PVRTC_RGBA4;
+                options.iOSCompression = TextureFormat.ASTC_6x6;
             }
             if (options.tvOSCompression == null)
             {
-                options.tvOSCompression = TextureFormat.ASTC_4x4;
+                options.tvOSCompression = TextureFormat.ASTC_6x6;
             }
 #endregion
 
