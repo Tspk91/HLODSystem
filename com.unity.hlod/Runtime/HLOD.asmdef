@@ -1,9 +1,6 @@
 {
     "name": "HLOD",
     "rootNamespace": "",
-    "references": [
-        "Whinarn.UnityMeshSimplifier.Runtime"
-    ],
     "includePlatforms": [],
     "excludePlatforms": [],
     "allowUnsafeCode": false,
