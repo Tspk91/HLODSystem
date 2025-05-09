@@ -9,7 +9,8 @@
   ],
   "category": "",
   "dependencies": {
-    "com.unity.settings-manager": "2.0.1"
+    "com.unity.settings-manager": "2.0.1",
+    "com.whinarn.unitymeshsimplifier": "3.1.0"
   },
   "samples": [
     {
