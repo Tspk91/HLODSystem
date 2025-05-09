@@ -1,4 +1,4 @@
-﻿using System.Collections.Generic;
+using System.Collections.Generic;
 using Unity.HLODSystem.Streaming;
 using UnityEngine;
 using UnityEngine.Rendering;
@@ -66,7 +66,12 @@ namespace Unity.HLODSystem
 
         public void OnPreCull(Camera cam)
         {
+            if (cam == null)
+                return;
+
+            Transform camTrans = null;
 #if UNITY_EDITOR
+
             if (EditorApplication.isPlaying == false)
             {
                 if (SceneView.currentDrawingSceneView == null)
@@ -78,20 +83,42 @@ namespace Unity.HLODSystem
             {
                 if (cam != HLODCameraRecognizerManager.ActiveCamera)
                     return;
+                else
+                    camTrans = HLODCameraRecognizer.RecognizedCameraTrans;
             }
 #else
-            if (cam != HLODCameraRecognizerManager.ActiveCamera)
-                    return;
+            if (cam != HLODCameraRecognizer.RecognizedCamera)
+                return;
+            else
+                camTrans = HLODCameraRecognizer.RecognizedCameraTrans;
 #endif
 
             if (m_activeControllers == null)
                 return;
 
+            if (camTrans == null)
+                camTrans = cam.GetComponent<Transform>();
+
             for (int i = 0; i < m_activeControllers.Count; ++i)
             {
-                m_activeControllers[i].UpdateCull(cam);
+                m_activeControllers[i].UpdateCull(cam, camTrans);
             }
         }
-    }
 
+        public bool IsLoadDone()
+        {
+            if (m_activeControllers == null ||
+                m_activeControllers.Count <= 0)
+                return true;
+
+            for (int i = 0; i < m_activeControllers.Count; ++i)
+            {
+                if(!m_activeControllers[i].IsLoadDone())
+                {
+                    return false;
+                }
+            }
+            return true;
+        }
+    }
 }
