@@ -157,7 +157,17 @@ namespace Unity.HLODSystem.Streaming
             LoadManager.Instance.UnloadHighObject(handle);
         }
 
-        #region Method
+        public void ReleaseLowObject(LoadManager.Handle handle)
+        {
+            if (m_createdLowObjects.ContainsKey(handle.Id) == false)
+            {
+                return;
+            }
+
+            m_createdLowObjects.Remove(handle.Id);
+            LoadManager.Instance.UnloadLowObject(handle);
+        }
+        
         public void UpdateCull(Camera camera, Transform camTransfrom)
         {
             if (m_spaceManager == null)

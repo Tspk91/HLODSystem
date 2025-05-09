@@ -48,6 +48,12 @@ namespace Unity.HLODSystem.Utils
             get => m_buffer.WrapMode;
         }
 
+        public bool IsNormal
+        {
+            set => m_buffer.IsNormal = value;
+            get => m_buffer.IsNormal;
+        }
+
         // Filter
         public float MipMapBias
         {

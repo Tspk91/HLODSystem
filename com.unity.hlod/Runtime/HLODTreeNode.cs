@@ -62,7 +62,7 @@ namespace Unity.HLODSystem
             get { return m_expectedState; }
         }
 
-        public enum State
+        public State CurrentState
         {
             get { return m_fsm.CurrentState; }
         }

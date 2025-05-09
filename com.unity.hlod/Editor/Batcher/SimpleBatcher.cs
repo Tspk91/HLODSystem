@@ -459,16 +459,30 @@ namespace Unity.HLODSystem
                 batcherOptions.MaterialGUID = "";
             if (batcherOptions.TextureInfoList == null)
             {
-                batcherOptions.TextureInfoList = new List<TextureInfo>(){
-                    new TextureInfo()
+                batcherOptions.TextureInfoList = new List<TextureInfo>()
                 {
-                    InputNames = { "_MainTex" },
-                    OutputName = "_MainTex",
-                    Type = PackingType.White,
-                    MipMapBias = 0f,
-                    AnisoLevel = 1,
-                    FilterMode = FilterMode.Bilinear,
-                });
+                    new TextureInfo()
+                    {
+                        InputNames = { "_MainTex" },
+                        OutputName = "_MainTex",
+                        Type = PackingType.White,
+                        MipMapBias = 0f,
+                        AnisoLevel = 1,
+                        FilterMode = FilterMode.Bilinear,
+                    },
+                    new TextureInfo() 
+                    { 
+                        InputNames = { "_BumpMap", "_NormalMap" }, 
+                        OutputName = "_NormalMap", 
+                        Type = PackingType.Normal 
+                    }, 
+                    new TextureInfo() 
+                    { 
+                        InputNames = { "_MaskMap"}, 
+                        OutputName = "_MaskMap", 
+                        Type = PackingType.Black 
+                    } 
+                };
             }
 
             batcherOptions.PackTextureSize = EditorGUILayout.IntPopup("Pack texture size", batcherOptions.PackTextureSize, Styles.PackTextureSizeNames, Styles.PackTextureSizes);
