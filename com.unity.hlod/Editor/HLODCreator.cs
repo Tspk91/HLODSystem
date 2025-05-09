@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -18,53 +18,6 @@ namespace Unity.HLODSystem
 {
     public static class HLODCreator
     {
-        public const string IGNORE_TAG = "HLOD_Ignore";
-
-        private static List<MeshRenderer> GetMeshRenderers(List<GameObject> gameObjects, float minObjectSize)
-        {
-
-            List<MeshRenderer> meshRenderers = new List<MeshRenderer>();
-
-            for (int i = 0; i < gameObjects.Count; ++i)
-            {
-                GameObject obj = gameObjects[i];
-                LODGroup lodGroup = obj.GetComponent<LODGroup>();
-
-                Renderer[] renderers;
-
-                if (lodGroup != null)
-                {
-                    renderers = lodGroup.GetLODs().Last().renderers;
-                }
-                else
-                {
-                    renderers = obj.GetComponents<Renderer>();
-                }
-
-                for (int ri = 0; ri < renderers.Length; ++ri)
-                {
-                    MeshRenderer mr = renderers[ri] as MeshRenderer;
-
-                    if (mr == null)
-                        continue;
-
-                    if (mr.shadowCastingMode == UnityEngine.Rendering.ShadowCastingMode.ShadowsOnly)
-                        continue;
-
-                    if (obj.CompareTag(IGNORE_TAG))
-                        continue;
-
-                    float max = Mathf.Max(mr.bounds.size.x, mr.bounds.size.y, mr.bounds.size.z);
-                    if (max < minObjectSize)
-                        continue;
-
-                    meshRenderers.Add(mr);
-                }
-            }
-
-            return meshRenderers;
-        }
-
         private static List<Collider> GetColliders(List<GameObject> gameObjects, float minObjectSize)
         {
             List<Collider> results = new List<Collider>();

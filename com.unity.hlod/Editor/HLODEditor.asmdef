@@ -4,9 +4,7 @@
     "references": [
         "HLOD",
         "Whinarn.UnityMeshSimplifier.Runtime",
-        "Unity.Settings.Editor",
-        "CCU",
-        "UnityMeshSimplifier"
+        "Unity.Settings.Editor"
     ],
     "includePlatforms": [
         "Editor"
