@@ -20,18 +20,6 @@ namespace Unity.HLODSystem
         private DisposableDictionary<TexturePacker.TextureAtlas, WorkingMaterial> m_createdMaterials = new DisposableDictionary<TexturePacker.TextureAtlas, WorkingMaterial>();
         private SerializableDynamicObject m_batcherOptions;
 
-        [Serializable]
-        public class TextureInfo
-        {
-            public string InputName = "_InputProperty";
-            public string OutputName = "_OutputProperty";
-            public PackingType Type = PackingType.White;
-
-            public float MipMapBias = 0f;
-            public int AnisoLevel = 1;
-            public FilterMode FilterMode = FilterMode.Bilinear;
-        }
-
         public SimpleBatcher(SerializableDynamicObject batcherOptions)
         {
             m_batcherOptions = batcherOptions;
@@ -253,20 +241,17 @@ namespace Unity.HLODSystem
                 for (int i = 0; i < atlas.Textures.Count; ++i)
                 {
                     WorkingTexture wt = atlas.Textures[i];
-                    var ti = textureInfoList[i];
                     wt.Name = "CombinedTexture " + index + "_" + i;
-                    if (ti.Type == PackingType.Normal)
+                    if (textureInfoList[i].Type == PackingType.Normal)
                     {
                         wt.Linear = true;
                         wt.IsNormal = true;
                     }
-                    wt.MipMapBias = ti.MipMapBias;
-                    wt.AnisoLevel = ti.AnisoLevel;
-                    wt.FilterMode = ti.FilterMode;
 
-                    wt.ApplyImportSettings();
-
-                    textures.Add(textureInfoList[i].OutputName, wt);
+                    if(!textures.TryAdd(textureInfoList[i].OutputName, wt))
+                    {
+                        Debug.Log(textureInfoList[i].OutputName);
+                    }
                 }
 
                 WorkingMaterial mat = CreateMaterial(options.MaterialGUID, textures);
@@ -464,11 +449,20 @@ namespace Unity.HLODSystem
                 {
                     InputNames = { "_MainTex" },
                     OutputName = "_MainTex",
-                    Type = PackingType.White,
-                    MipMapBias = 0f,
-                    AnisoLevel = 1,
-                    FilterMode = FilterMode.Bilinear,
-                });
+                    Type = PackingType.White
+                },
+                new TextureInfo()
+                {
+                    InputNames = { "_BumpMap", "_NormalMap" },
+                    OutputName = "_NormalMap",
+                    Type = PackingType.Normal
+                },
+                new TextureInfo()
+                {
+                    InputNames = { "_MaskMap"},
+                    OutputName = "_MaskMap",
+                    Type = PackingType.Black
+                } };
             }
 
             batcherOptions.PackTextureSize = EditorGUILayout.IntPopup("Pack texture size", batcherOptions.PackTextureSize, Styles.PackTextureSizeNames, Styles.PackTextureSizes);
@@ -507,38 +501,12 @@ namespace Unity.HLODSystem
                 materialMapping = HLODEditorSettings.DefaultMaterialMapping;
             }
 
-            //ext textures
-            EditorGUILayout.Space();
-            EditorGUILayout.LabelField("Textures");
-            EditorGUI.indentLevel += 1;
-            EditorGUILayout.BeginHorizontal();
-            EditorGUILayout.PrefixLabel(" ");
-            //EditorGUILayout.LabelField();
-            EditorGUILayout.SelectableLabel("Input");
-            EditorGUILayout.SelectableLabel("Output");
-            EditorGUILayout.SelectableLabel("Type");
-            EditorGUILayout.SelectableLabel("MipMapBias");
-            EditorGUILayout.SelectableLabel("AnisoLevel");
-            EditorGUILayout.SelectableLabel("FilterMode");
             EditorGUILayout.EndHorizontal();
 
             if (batcherOptions.FoldoutMapping != false)
             {
-                TextureInfo info = batcherOptions.TextureInfoList[i];
-                GUILayout.FlexibleSpace();
-                EditorGUILayout.BeginHorizontal();
-                EditorGUILayout.PrefixLabel(" ");
-
-                info.InputName = StringPopup(info.InputName, inputTexturePropertyNames);
-                info.OutputName = StringPopup(info.OutputName, outputTexturePropertyNames);
-                info.Type = (PackingType)EditorGUILayout.EnumPopup(info.Type);
-                info.MipMapBias = EditorGUILayout.FloatField(info.MipMapBias);
-                info.AnisoLevel = EditorGUILayout.IntPopup(info.AnisoLevel, new string[] { "-3", "-2", "-1", "0", "1", "2", "3" }, new int[] { -3, -2, -1, 0, 1, 2, 3 });
-                info.FilterMode = (FilterMode)EditorGUILayout.EnumPopup(info.FilterMode);
-
-                if (i == 0)
-                    GUI.enabled = false;
-                if (GUILayout.Button("x") == true)
+                EditorGUILayout.Space(2.5f);
+                if (materialMapping == null)
                 {
                     EditorGUILayout.HelpBox("Both this component's Material Mapping and the default are set to null.\nPlease assign a Material Mapping object to either this component or Preferences/HLOD/Default Material Mapping", MessageType.Error);
                 }

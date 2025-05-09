@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections;
 using System.Collections.Generic;
 using Unity.HLODSystem.SpaceManager;
@@ -138,10 +138,9 @@ namespace Unity.HLODSystem
             get { return m_convertedPrefabObjects; }
         }
 
-        Bounds CalcLocalBounds(Renderer renderer, Vector3 localPos)
+        public List<HLODControllerBase> GetHLODControllerBases()
         {
-            Bounds bounds = renderer.bounds;
-            bounds.center -= localPos;
+            List<HLODControllerBase> controllerBases = new List<HLODControllerBase>();
 
             foreach (Object obj in m_generatedObjects)
             {
@@ -174,12 +173,10 @@ namespace Unity.HLODSystem
                 return ret;
             }
 
-            var localPos = GetComponent<Transform>().position;
-
-            Bounds bounds = CalcLocalBounds(renderers[0], localPos);
+            Bounds bounds = Utils.BoundsUtils.CalcLocalBounds(renderers[0], transform);
             for (int i = 1; i < renderers.Length; ++i)
             {
-                bounds.Encapsulate(CalcLocalBounds(renderers[i], localPos));
+                bounds.Encapsulate(Utils.BoundsUtils.CalcLocalBounds(renderers[i], transform));
             }
 
             ret.center = bounds.center;

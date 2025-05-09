@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using Unity.Collections;
 using UnityEditor;
@@ -48,23 +48,12 @@ namespace Unity.HLODSystem.Utils
             get => m_buffer.WrapMode;
         }
 
-        // Filter
-        public float MipMapBias
+        public bool IsNormal
         {
-            set => m_buffer.MipMapBias = value;
-            get => m_buffer.MipMapBias;
+            set => m_buffer.IsNormal = value;
+            get => m_buffer.IsNormal;
         }
-        public int AnisoLevel
-        {
-            set => m_buffer.AnisoLevel = value;
-            get => m_buffer.AnisoLevel;
-        }
-        public FilterMode FilterMode
-        {
-            set => m_buffer.FilterMode = value;
-            get => m_buffer.FilterMode;
-        }
-
+        
         private WorkingTexture()
         {
             
@@ -187,11 +176,6 @@ namespace Unity.HLODSystem.Utils
                 m_buffer = newBuffer;
             }
         }
-
-        public void ApplyImportSettings()
-        {
-            m_buffer.ApplyImportSettings();
-        }
     }
 
     public class WorkingTextureBufferManager
@@ -257,12 +241,8 @@ namespace Unity.HLODSystem.Utils
         private int m_width;
         private int m_height;
         private bool m_linear;
+        private bool m_isNormal;
 
-        // Filter
-        float m_mipMapBias = 0f;
-        int m_anisoLevel = 0;
-        FilterMode m_filterMode = FilterMode.Bilinear;
-        
         private NativeArray<Color> m_pixels;
         
         private int m_refCount;
@@ -295,22 +275,6 @@ namespace Unity.HLODSystem.Utils
             set => m_wrapMode = value;
         }
 
-        public float MipMapBias
-        {
-            get => m_mipMapBias;
-            set => m_mipMapBias = value;
-        }
-        public int AnisoLevel
-        {
-            get => m_anisoLevel;
-            set => m_anisoLevel = value;
-        }
-        public FilterMode FilterMode
-        {
-            get => m_filterMode;
-            set => m_filterMode = value;
-        }
-
 
         public WorkingTextureBuffer(Allocator allocator, TextureFormat format, int width, int height, bool linear)
         {
@@ -322,9 +286,6 @@ namespace Unity.HLODSystem.Utils
             m_pixels = new NativeArray<Color>( width * height, allocator);
             m_refCount = 0;
             m_source = null;
-            m_mipMapBias = 0f;
-            m_anisoLevel = 1;
-            m_filterMode = FilterMode.Bilinear;
             m_guid = Guid.NewGuid();
         }
 
@@ -349,11 +310,6 @@ namespace Unity.HLODSystem.Utils
             texture.name = Name;
             texture.SetPixels(m_pixels.ToArray());
             texture.wrapMode = m_wrapMode;
-
-            texture.mipMapBias = MipMapBias;
-            texture.anisoLevel = AnisoLevel;
-            texture.filterMode = FilterMode;
-
             texture.Apply();
             return texture;
         }
@@ -447,7 +403,7 @@ namespace Unity.HLODSystem.Utils
 
                     SetPixel(tx, ty, source.GetPixel(sx, sy));
                 }
-            }            
+            }
         }
         
         private void CopyFrom(Texture2D texture)
@@ -465,12 +421,6 @@ namespace Unity.HLODSystem.Utils
                 type = textureImporter.textureType;
                 textureImporter.isReadable = true;
                 textureImporter.textureType = TextureImporterType.Default;
-
-                // Filtering
-                m_mipMapBias = textureImporter.mipMapBias;
-                m_anisoLevel = textureImporter.anisoLevel;
-                m_filterMode = textureImporter.filterMode;
-
                 textureImporter.SaveAndReimport();
             }
 
@@ -498,20 +448,6 @@ namespace Unity.HLODSystem.Utils
 
         }
 
-        public void ApplyImportSettings()
-        {
-            var assetImporter = AssetImporter.GetAtPath(AssetDatabase.GetAssetPath(m_source));
-            var textureImporter = assetImporter as TextureImporter;
-
-            if(textureImporter)
-            {
-                textureImporter.mipMapBias = m_mipMapBias;
-                textureImporter.anisoLevel = m_anisoLevel;
-                textureImporter.filterMode = m_filterMode;
-
-                textureImporter.SaveAndReimport();
-            }
-        }
     }
 
 }
