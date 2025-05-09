@@ -1,12 +1,16 @@
-﻿using System;
+using System;
 using UnityEngine;
 
 namespace Unity.HLODSystem
 {
     public class HLODCameraRecognizer : MonoBehaviour
     {
-        private Camera m_recognizedCamera;
-        public Camera RecognizedCamera => m_recognizedCamera;
+        private static HLODCameraRecognizer s_instance;
+        private static Camera s_recognizedCamera;
+        private static Transform s_recognizedCameraTrans;
+        public static HLODCameraRecognizer Instance => s_instance;
+        public static Camera RecognizedCamera => s_recognizedCamera;
+        public static Transform RecognizedCameraTrans => s_recognizedCameraTrans;
 
         [SerializeField]
         private int m_id;
@@ -34,8 +38,9 @@ namespace Unity.HLODSystem
 
         private void Awake()
         {
-            
-            m_recognizedCamera = GetComponent<Camera>();
+            s_instance = this;
+            s_recognizedCamera = GetComponent<Camera>();
+            s_recognizedCameraTrans = GetComponent<Transform>();
         }
         private void OnEnable()
         {
@@ -51,8 +56,9 @@ namespace Unity.HLODSystem
         {
             if (enabled == false)
             {
-                Debug.LogError("Failed to active HLODCameraRecognizer. It is not Enabled.");
-                return;
+                s_instance = null;
+                s_recognizedCamera = null;
+                s_recognizedCameraTrans = null;
             }
 
             HLODCameraRecognizerManager.Instance.Active(this);

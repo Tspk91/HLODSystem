@@ -34,10 +34,13 @@ namespace Unity.HLODSystem.Streaming
         public abstract void UnloadLowObject(int id);
         
         #endregion
-        
+
+        Transform trans;
+
         #region Unity Events
         public void Awake()
         {
+            trans = GetComponent<Transform>();
             m_spaceManager = new QuadTreeSpaceManager();
         }
 
@@ -154,23 +157,13 @@ namespace Unity.HLODSystem.Streaming
             LoadManager.Instance.UnloadHighObject(handle);
         }
 
-        public void ReleaseLowObject(LoadManager.Handle handle)
-        {
-            if (m_createdLowObjects.ContainsKey(handle.Id) == false)
-            {
-                return;
-            }
-
-            m_createdLowObjects.Remove(handle.Id);
-            LoadManager.Instance.UnloadLowObject(handle);
-        }
-        
-        public void UpdateCull(Camera camera)
+        #region Method
+        public void UpdateCull(Camera camera, Transform camTransfrom)
         {
             if (m_spaceManager == null)
                 return;
 
-            m_spaceManager.UpdateCamera(this.transform, camera);
+            m_spaceManager.UpdateCamera(trans, camera, camTransfrom);
 
             if ( m_controlMode == Mode.AutoControl)
                 m_root.Cull(m_spaceManager.IsCull(m_cullDistance, m_root.Bounds));
