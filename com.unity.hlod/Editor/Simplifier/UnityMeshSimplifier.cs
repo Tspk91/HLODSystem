@@ -22,7 +22,8 @@ namespace Unity.HLODSystem.Simplifier
 
         protected override IEnumerator GetSimplifiedMesh(Utils.WorkingMesh origin, float quality, Action<Utils.WorkingMesh> resultCallback)
         { 
-            var meshSimplifier = new global::UnityMeshSimplifier.MeshSimplifier();
+            
+            var meshSimplifier = new global::UnityMeshSimplifier.MeshSimplifierWhin();
             meshSimplifier.SimplificationOptions = new global::UnityMeshSimplifier.SimplificationOptions
             {
                 PreserveBorderEdges = m_options.PreserveBorderEdges,

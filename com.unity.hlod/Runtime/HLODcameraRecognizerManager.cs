@@ -37,7 +37,7 @@ namespace Unity.HLODSystem
                 if (recognizer == null)
                     return null;
 
-                return recognizer.RecognizedCamera;
+                return HLODCameraRecognizer.RecognizedCamera;
             }
         }
 

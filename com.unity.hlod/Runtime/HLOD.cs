@@ -161,6 +161,15 @@ namespace Unity.HLODSystem
             }
             return controllerBases;
         }
+
+
+        Bounds CalcLocalBounds(Renderer renderer, Vector3 localPos)
+        {
+            Bounds bounds = renderer.bounds;
+            bounds.center -= localPos;
+
+            return bounds;
+        }
 #endif
         public Bounds GetBounds()
         {
@@ -173,20 +182,21 @@ namespace Unity.HLODSystem
                 return ret;
             }
 
-            Bounds bounds = Utils.BoundsUtils.CalcLocalBounds(renderers[0], transform);
+            var localPos = GetComponent<Transform>().position;
+
+            Bounds bounds = CalcLocalBounds(renderers[0], localPos);
             for (int i = 1; i < renderers.Length; ++i)
             {
-                bounds.Encapsulate(Utils.BoundsUtils.CalcLocalBounds(renderers[i], transform));
+                bounds.Encapsulate(CalcLocalBounds(renderers[i], localPos));
             }
 
             ret.center = bounds.center;
             float max = Mathf.Max(bounds.size.x, bounds.size.y, bounds.size.z);
-            ret.size = new Vector3(max, max, max);  
+            ret.size = new Vector3(max, max, max);
 
             return ret;
         }
 
-    
 
         public void OnBeforeSerialize()
         {

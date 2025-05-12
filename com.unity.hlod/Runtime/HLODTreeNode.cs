@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections;
 using System.Collections.Generic;
 using Unity.HLODSystem.Serializer;
@@ -11,7 +11,7 @@ using Random = UnityEngine.Random;
 namespace Unity.HLODSystem
 {
     [Serializable]
-    public class HLODTreeNode
+    public class HLODTreeNode : IHLODTreeNodeFSMStateChange
     {
         [SerializeField] 
         private int m_level;
@@ -28,11 +28,15 @@ namespace Unity.HLODSystem
         [SerializeField]
         private List<int> m_lowObjectIds = new List<int>();
 
+
         private Dictionary<int, LoadManager.Handle> m_highObjects = new Dictionary<int, LoadManager.Handle>();
         private Dictionary<int, LoadManager.Handle> m_lowObjects = new Dictionary<int, LoadManager.Handle>();
+        private GameObject[] m_hightObjectsValues;
+        private GameObject[] m_lowObjectsValues;
 
         private Dictionary<int, LoadManager.Handle> m_loadedHighObjects;
         private Dictionary<int, LoadManager.Handle> m_loadedLowObjects;
+
 
         public int Level
         {
@@ -60,10 +64,12 @@ namespace Unity.HLODSystem
             get { return m_expectedState; }
         }
 
+
         public State CurrentState
         {
             get { return m_fsm.CurrentState; }
         }
+
 
         public enum State
         {
@@ -72,7 +78,7 @@ namespace Unity.HLODSystem
             High,
         }
 
-        private FSM<State> m_fsm = new FSM<State>();
+        private HLODTreeNodeFSM m_fsm = new HLODTreeNodeFSM();
         private State m_expectedState = State.Release;
 
         private HLODControllerBase m_controller;
@@ -155,18 +161,20 @@ namespace Unity.HLODSystem
             //set to initialize state
             m_fsm.ChangeState(State.Release);
 
-            m_fsm.RegisterIsReadyToEnterFunction(State.Release, IsReadyToEnterRelease);
-            m_fsm.RegisterEnteredFunction(State.Release, OnEnteredRelease);
+            m_fsm.RegisterCallback(this);
 
-            m_fsm.RegisterEnteringFunction(State.Low, OnEnteringLow);
-            m_fsm.RegisterIsReadyToEnterFunction(State.Low, IsReadyToEnterLow);
-            m_fsm.RegisterEnteredFunction(State.Low, OnEnteredLow);
-            m_fsm.RegisterExitedFunction(State.Low, OnExitedLow);
+            //m_fsm.RegisterIsReadyToEnterFunction(State.Release, IsReadyToEnterRelease);
+            //m_fsm.RegisterEnteredFunction(State.Release, OnEnteredRelease);
 
-            m_fsm.RegisterEnteringFunction(State.High, OnEnteringHigh);
-            m_fsm.RegisterIsReadyToEnterFunction(State.High, IsReadyToEnterHigh);
-            m_fsm.RegisterEnteredFunction(State.High, OnEnteredHigh);
-            m_fsm.RegisterExitedFunction(State.High, OnExitedHigh);
+            //m_fsm.RegisterEnteringFunction(State.Low, OnEnteringLow);
+            //m_fsm.RegisterIsReadyToEnterFunction(State.Low, IsReadyToEnterLow);
+            //m_fsm.RegisterEnteredFunction(State.Low, OnEnteredLow);
+            //m_fsm.RegisterExitedFunction(State.Low, OnExitedLow);
+
+            //m_fsm.RegisterEnteringFunction(State.High, OnEnteringHigh);
+            //m_fsm.RegisterIsReadyToEnterFunction(State.High, IsReadyToEnterHigh);
+            //m_fsm.RegisterEnteredFunction(State.High, OnEnteredHigh);
+            //m_fsm.RegisterExitedFunction(State.High, OnExitedHigh);
             
             m_controller = controller;
             m_userDataSerializer = controller.UserDataserializer;
@@ -549,13 +557,18 @@ namespace Unity.HLODSystem
             HLODTreeNodeRenderer.Instance.Render(this, transform, Color.yellow, 3.0f);
         }*/        
 
-        void CopyToValueArray(Dictionary<int, GameObject> dict, ref GameObject[] values)
+        void CopyToValueArray(Dictionary<int, LoadManager.Handle> dict, ref GameObject[] values)
         {
             if(values == null || values.Length != dict.Count)
             {
                 values = new GameObject[dict.Count];
             }
-            dict.Values.CopyTo(values, 0);
+            int i = 0;
+            foreach (var item in dict)
+            {
+                values[i] = item.Value.LoadedObject;
+                i++;
+            }
         }
 
         private void UpdateVisible()
@@ -569,14 +582,23 @@ namespace Unity.HLODSystem
                 m_isVisibleHierarchy = m_isVisible;    
             }
 
-            foreach (var item in m_highObjects)
+            if (m_hightObjectsValues != null)
             {
-                item.Value.LoadedObject.SetActive(m_isVisibleHierarchy);
+                for (int i = 0; i < m_hightObjectsValues.Length; i++)
+                {
+                    m_hightObjectsValues[i].SetActive(m_isVisibleHierarchy);
+                }
             }
 
-            foreach (var item in m_lowObjects)
+            if (m_lowObjectsValues != null)
             {
-                item.Value.LoadedObject.SetActive(m_isVisibleHierarchy);
+                if (m_lowObjectsValues.Length > 0)
+                {
+                    for (int i = 0; i < m_lowObjectsValues.Length; i++)
+                    {
+                        m_lowObjectsValues[i].SetActive(m_isVisibleHierarchy);
+                    }
+                }
             }
         }
 
