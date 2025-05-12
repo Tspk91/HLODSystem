@@ -9,11 +9,11 @@ using UnityEditor.Experimental;
 
 namespace Unity.HLODSystem
 {
-    [ScriptedImporter(version: 1, ext: "hlod", AllowCaching = true)]
-    public class HLODDataImporter : ScriptedImporter
+    [UnityEditor.AssetImporters.ScriptedImporter(version: 1, ext: "hlod", AllowCaching = true)]
+    public class HLODDataImporter : UnityEditor.AssetImporters.ScriptedImporter
     {
         
-        public override void OnImportAsset(AssetImportContext ctx)
+        public override void OnImportAsset(UnityEditor.AssetImporters.AssetImportContext ctx)
         {
             ctx.DependsOnCustomDependency("HLODSystemPlatform");
             

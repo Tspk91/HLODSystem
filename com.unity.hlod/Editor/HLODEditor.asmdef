@@ -5,6 +5,8 @@
         "HLOD",
         "Whinarn.UnityMeshSimplifier.Runtime",
         "Unity.Settings.Editor"
+        "CCU",
+        "UnityMeshSimplifier",
     ],
     "includePlatforms": [
         "Editor"

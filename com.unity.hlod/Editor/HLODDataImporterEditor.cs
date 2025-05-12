@@ -1,4 +1,4 @@
-﻿using System.Collections;
+using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEditor;
@@ -8,7 +8,7 @@ using System.IO;
 namespace Unity.HLODSystem
 {
     [CustomEditor(typeof(HLODDataImporter))]
-    public class HLODDataImporterEditor : ScriptedImporterEditor
+    public class HLODDataImporterEditor : UnityEditor.AssetImporters.ScriptedImporterEditor
     {
         static bool s_textureFoldout = false;
         static bool s_meshFoldout = false;
