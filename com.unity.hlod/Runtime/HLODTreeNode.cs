@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using Unity.HLODSystem.Serializer;
@@ -179,6 +179,49 @@ namespace Unity.HLODSystem
             m_boundsLength = m_bounds.extents.x * m_bounds.extents.x + m_bounds.extents.z * m_bounds.extents.z;
         }
 
+        public void Entering(State state)
+        {
+            if (state == State.Low)
+                OnEnteringLow();
+            else if (state == State.High)
+                OnEnteringHigh();
+        }
+        public bool IsReadyToEnter(HLODTreeNode.State state)
+        {
+            if (state == State.Release)
+                return IsReadyToEnterRelease();
+            else if (state == State.Low)
+                return IsReadyToEnterLow();
+            else if (state == State.High)
+                return IsReadyToEnterHigh();
+            return true;
+        }
+        public void Entered(HLODTreeNode.State state)
+        {
+            if (state == State.Release)
+                OnEnteredRelease();
+            else if (state == State.Low)
+                OnEnteredLow();
+            else if (state == State.High)
+                OnEnteredHigh();
+        }
+
+        /*public void Exiting(HLODTreeNode.State state)
+        {
+
+        }*/
+        /*public bool IsReadyToExit(HLODTreeNode.State state)
+        {
+            return true;
+        }*/
+        public void Exited(HLODTreeNode.State state)
+        {
+            if (state == State.Low)
+                OnExitedLow();
+            else if (state == State.High)
+                OnExitedHigh();
+        }
+
         public bool IsLoadDone()
         {
             if (m_parent == null && m_fsm.CurrentState == State.Release)
@@ -306,6 +349,7 @@ namespace Unity.HLODSystem
         void OnEnteredLow()
         {
             m_lowObjects = m_loadedLowObjects;
+            CopyToValueArray(m_lowObjects, ref m_lowObjectsValues);
             m_loadedLowObjects = null;
 
             for (int i = 0; i < m_childTreeNodeIds.Count; ++i)
@@ -324,6 +368,7 @@ namespace Unity.HLODSystem
                 m_controller.ReleaseLowObject(item.Value);
             }
             m_lowObjects.Clear();
+            m_lowObjectsValues = null;
         }
 
         void OnEnteringHigh()
@@ -386,6 +431,7 @@ namespace Unity.HLODSystem
             }
             
             m_highObjects = m_loadedHighObjects;
+            CopyToValueArray(m_highObjects, ref m_hightObjectsValues);
             m_loadedHighObjects = null;
         }
 
@@ -397,6 +443,7 @@ namespace Unity.HLODSystem
                 m_controller.ReleaseHighObject(item.Value);
             }
             m_highObjects.Clear();
+            m_hightObjectsValues = null;
             
             for (int i = 0; i < m_childTreeNodeIds.Count; ++i)
             {
@@ -501,6 +548,15 @@ namespace Unity.HLODSystem
             
             HLODTreeNodeRenderer.Instance.Render(this, transform, Color.yellow, 3.0f);
         }*/        
+
+        void CopyToValueArray(Dictionary<int, GameObject> dict, ref GameObject[] values)
+        {
+            if(values == null || values.Length != dict.Count)
+            {
+                values = new GameObject[dict.Count];
+            }
+            dict.Values.CopyTo(values, 0);
+        }
 
         private void UpdateVisible()
         {
