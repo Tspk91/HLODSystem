@@ -111,8 +111,14 @@ namespace Unity.HLODSystem
                 if ( colorCount > 0 )
                     FillBuffer(ref colors, mesh.colors, remapper, Color.white);
 
-                FillIndices(ref triangles, mesh.GetTriangles(infos[i].MeshIndex), remapper, startIndex);
+                int[] meshTriangles = mesh.GetTriangles(infos[i].MeshIndex);
+                //esto comprueba si el mesh transform esta invertido
+                //si lo esta, invierte los triangulos para que no se vean alreves
+                if (infos[i].Transform.determinant < 0f)
+                    for (int j = 0; j < meshTriangles.Length; j += 3)
+                        (meshTriangles[j], meshTriangles[j + 2]) = (meshTriangles[j + 2], meshTriangles[j + 0]);
 
+                FillIndices(ref triangles, meshTriangles, remapper, startIndex);
             }
 
             combinedMesh.name = "CombinedMesh";

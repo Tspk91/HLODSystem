@@ -21,9 +21,14 @@ namespace Unity.HLODSystem.Simplifier
         }
 
         protected override IEnumerator GetSimplifiedMesh(Utils.WorkingMesh origin, float quality, Action<Utils.WorkingMesh> resultCallback)
-        { 
-            
+        {
+            string name = origin.name;
             var meshSimplifier = new global::UnityMeshSimplifier.MeshSimplifierWhin();
+            m_options.PreserveBorderEdges = true;
+            m_options.PreserveUVSeamEdges = true;
+            m_options.PreserveUVFoldoverEdges = false;
+            m_options.EnableSmartLink = true;
+
             meshSimplifier.SimplificationOptions = new global::UnityMeshSimplifier.SimplificationOptions
             {
                 PreserveBorderEdges = m_options.PreserveBorderEdges,
@@ -37,6 +42,8 @@ namespace Unity.HLODSystem.Simplifier
                 ManualUVComponentCount = m_options.ManualUVComponentCount,
                 UVComponentCount = m_options.UVComponentCount,
             };
+
+
             meshSimplifier.Vertices = origin.vertices;
             meshSimplifier.Normals = origin.normals;
             meshSimplifier.Tangents = origin.tangents;
@@ -77,7 +84,6 @@ namespace Unity.HLODSystem.Simplifier
             {
                 nwm.SetTriangles(meshSimplifier.GetSubMeshTriangles(submesh), submesh);
             }
-
             if (resultCallback != null)
             {
                 resultCallback(nwm);

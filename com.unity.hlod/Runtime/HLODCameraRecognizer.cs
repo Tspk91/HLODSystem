@@ -51,7 +51,20 @@ namespace Unity.HLODSystem
         {
             HLODCameraRecognizerManager.Instance.UnregisterRecognizer(this);            
         }
-        
+
+
+#if UNITY_EDITOR
+        public bool moveWithEditorCam;
+        private void Update()
+        {
+            if (moveWithEditorCam && UnityEditor.SceneView.lastActiveSceneView != null)
+            {
+                var trans = UnityEditor.SceneView.lastActiveSceneView.camera.transform;
+                s_recognizedCameraTrans.SetPositionAndRotation(trans.position, trans.rotation);
+            }
+        }
+#endif
+
         public void Active()
         {
             if (enabled == false)

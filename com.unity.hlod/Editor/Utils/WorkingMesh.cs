@@ -554,7 +554,8 @@ namespace Unity.HLODSystem.Utils
             }
             mesh.name = name;
             mesh.bounds = bounds;
-            
+            mesh.RecalculateNormals();
+            mesh.RecalculateTangents();
             mesh.RecalculateBounds();
         }
     }

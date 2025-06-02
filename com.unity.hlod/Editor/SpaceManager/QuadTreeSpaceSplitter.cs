@@ -218,6 +218,9 @@ namespace Unity.HLODSystem.SpaceManager
                 Bounds? bounds = CalculateBounds(gameObjects[i], transform);
                 if ( bounds == null )
                     continue;
+                var b = bounds.Value;
+                b.size = Vector3.zero;
+                bounds = b;
                 targetInfos.Add(new TargetInfo()
                 {
                     GameObject = gameObjects[i],

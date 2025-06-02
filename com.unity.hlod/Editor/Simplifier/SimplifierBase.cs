@@ -22,42 +22,34 @@ namespace Unity.HLODSystem.Simplifier
                 Utils.WorkingMesh mesh = buildInfo.WorkingObjects[i].Mesh;
 
                 int triangleCount = mesh.triangles.Length / 3;
-                float maxQuality = Mathf.Min((float)m_options.SimplifyMaxPolygonCount / (float)triangleCount, (float)m_options.SimplifyPolygonRatio);
                 float minQuality = Mathf.Max((float)m_options.SimplifyMinPolygonCount / (float)triangleCount, 0.0f);
 
-                var ratio = maxQuality * Mathf.Pow((float)m_options.SimplifyPolygonRatio, buildInfo.Distances[i]);
+                float ratio = 1;
+                int distance = buildInfo.Distances[i] - 1;
+                if (distance <= 0)
+                    ratio = 1;
+                else
+                    ratio = Mathf.Pow((float)m_options.SimplifyPolygonRatio, buildInfo.Distances[i]-1);
+
                 ratio = Mathf.Max(ratio, minQuality);
 
-                
-//                while (Cache.SimplifiedCache.IsGenerating(GetType(), mesh, ratio) == true)
-//                {
-//                    yield return null;
-//                }
-//                Mesh simplifiedMesh = Cache.SimplifiedCache.Get(GetType(), mesh, ratio);
-//                if (simplifiedMesh == null)
-//                {
-//                    Cache.SimplifiedCache.MarkGenerating(GetType(), mesh, ratio);
-                    yield return GetSimplifiedMesh(mesh, ratio, (m) =>
-                    {
-                        buildInfo.WorkingObjects[i].SetMesh(m);
-                    });
-//                    Cache.SimplifiedCache.Update(GetType(), mesh, simplifiedMesh, ratio);
-                    
-//                }
-
-            }            
+                yield return GetSimplifiedMesh(mesh, ratio, (m) =>
+                {
+                    buildInfo.WorkingObjects[i].SetMesh(m);
+                });
+            }
         }
 
         public void SimplifyImmidiate(HLODBuildInfo buildInfo)
         {
-            
+
             IEnumerator routine = Simplify(buildInfo);
             CustomCoroutine coroutine = new CustomCoroutine(routine);
             while (coroutine.MoveNext())
             {
-                
+
             }
-            
+
         }
 
         protected abstract IEnumerator GetSimplifiedMesh(Utils.WorkingMesh origin, float quality, Action<Utils.WorkingMesh> resultCallback);
@@ -119,6 +111,6 @@ namespace Unity.HLODSystem.Simplifier
 
             EditorGUI.indentLevel -= 1;
         }
-        
+
     }
 }

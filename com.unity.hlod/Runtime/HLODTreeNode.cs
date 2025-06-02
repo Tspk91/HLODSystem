@@ -31,7 +31,9 @@ namespace Unity.HLODSystem
 
         private Dictionary<int, LoadManager.Handle> m_highObjects = new Dictionary<int, LoadManager.Handle>();
         private Dictionary<int, LoadManager.Handle> m_lowObjects = new Dictionary<int, LoadManager.Handle>();
+        public GameObject[] HightObjects => m_hightObjectsValues;
         private GameObject[] m_hightObjectsValues;
+        public GameObject[] LowObjects => m_lowObjectsValues;
         private GameObject[] m_lowObjectsValues;
 
         private Dictionary<int, LoadManager.Handle> m_loadedHighObjects;
@@ -466,8 +468,6 @@ namespace Unity.HLODSystem
         {
             m_fsm.ChangeState(State.Release);
         }
-        #endregion
-        
 
         public void Update(HLODControllerBase.Mode mode, int manualLevel, float lodDistance)
         {
@@ -475,17 +475,18 @@ namespace Unity.HLODSystem
 
             var beforeState = m_fsm.CurrentState;
 
+            bool isLeaf = m_childTreeNodeIds == null || m_childTreeNodeIds.Count == 0;
+
             if (mode == HLODControllerBase.Mode.DisableHLOD)
             {
-                m_expectedState = State.High;
+                m_expectedState = isLeaf ? State.Low : State.High;
             }
             else if (mode == HLODControllerBase.Mode.ManualControl)
             {
-                //Tree nodes suitable for the manual level must be calculated and displayed.
                 m_expectedState = State.Release;
                 if (manualLevel >= 0 && m_level < manualLevel)
                 {
-                    m_expectedState = State.High;
+                    m_expectedState = isLeaf ? State.Low : State.High;
                 }
                 else if (m_level == manualLevel)
                 {
@@ -494,7 +495,6 @@ namespace Unity.HLODSystem
             }
             else
             {
-                //Change state if a change to another state is needed immediately after changing the state.
                 m_expectedState = m_spaceManager.IsHigh(lodDistance, m_bounds) ? State.High : State.Low;
 
                 if (m_parent != null)
@@ -504,8 +504,12 @@ namespace Unity.HLODSystem
                         m_expectedState = State.Release;
                     }
                 }
-            }
 
+                if (isLeaf && m_expectedState == State.High)
+                {
+                    m_expectedState = State.Low;
+                }
+            }
 
             do
             {
@@ -514,10 +518,7 @@ namespace Unity.HLODSystem
                 {
                     if (m_expectedState == State.High)
                     {
-                        //if isVisible is false, it loaded from parent but not showing. 
-                        //We have to wait for showing after then, change state to high.
-                        if (m_fsm.CurrentState == State.Low &&
-                            m_isVisible == true)
+                        if (m_fsm.CurrentState == State.Low && m_isVisible == true)
                         {
                             m_fsm.ChangeState(State.High);
                         }
@@ -532,7 +533,7 @@ namespace Unity.HLODSystem
             } while (beforeState != m_fsm.CurrentState);
 
             UpdateVisible();
-            
+
             for (int i = 0; i < m_childTreeNodeIds.Count; ++i)
             {
                 var childTreeNode = m_container.Get(m_childTreeNodeIds[i]);
@@ -603,5 +604,5 @@ namespace Unity.HLODSystem
         }
 
     }
-
+    #endregion
 }

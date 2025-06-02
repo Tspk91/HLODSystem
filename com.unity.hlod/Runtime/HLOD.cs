@@ -193,7 +193,7 @@ namespace Unity.HLODSystem
             ret.center = bounds.center;
             float max = Mathf.Max(bounds.size.x, bounds.size.y, bounds.size.z);
             ret.size = new Vector3(max, max, max);
-
+            //ret.size = Vector3.one * 0.01f;
             return ret;
         }
 

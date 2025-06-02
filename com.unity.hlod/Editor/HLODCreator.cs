@@ -54,10 +54,7 @@ namespace Unity.HLODSystem
                     if (obj.CompareTag(IGNORE_TAG))
                         continue;
 
-                    float max = Mathf.Max(mr.bounds.size.x, mr.bounds.size.y, mr.bounds.size.z);
-                    if (max < minObjectSize)
-                        continue;
-
+                    //float max = Mathf.Max(mr.bounds.size.x, mr.bounds.size.y, mr.bounds.size.z);
                     meshRenderers.Add(mr);
                 }
             }
@@ -73,14 +70,10 @@ namespace Unity.HLODSystem
             {
                 GameObject obj = gameObjects[i];
                 Collider[] colliders = obj.GetComponentsInChildren<Collider>();
-                
+
                 for (int ci = 0; ci < colliders.Length; ++ci)
                 {
                     Collider collider = colliders[ci];
-                    float max = Mathf.Max(collider.bounds.size.x, collider.bounds.size.y, collider.bounds.size.z);
-                    if (max < minObjectSize)
-                        continue;
-                    
                     results.Add(collider);
                 }
             }
@@ -104,7 +97,7 @@ namespace Unity.HLODSystem
                 return;
 
             int parentIndex = list[curIndex].Parent;
-            
+
             if (parentIndex < 0)
                 return;
 
@@ -112,21 +105,21 @@ namespace Unity.HLODSystem
 
             parent.TargetGameObjects.AddRange(objects);
             parent.Distances.AddRange(Enumerable.Repeat<int>(distance, objects.Count));
-            
-            CopyObjectsToParent(list, parentIndex, objects, distance + 1);
 
+            CopyObjectsToParent(list, parentIndex, objects, distance + 1);
         }
+
         private static DisposableList<HLODBuildInfo> CreateBuildInfo(HLOD hlod, SpaceNode root, float minObjectSize)
         {
-            //List<HLODBuildInfo> resultsCandidates = new List<HLODBuildInfo>();
-            
+            minObjectSize = 0;
+
             Queue<TravelQueueItem> travelQueue = new Queue<TravelQueueItem>();
-            
+
             List<TravelQueueItem> candidateItems = new List<TravelQueueItem>();
             List<HLODBuildInfo> buildInfoCandidates = new List<HLODBuildInfo>();
-            
+
             int maxLevel = 0;
-            
+
             travelQueue.Enqueue(new TravelQueueItem()
             {
                 Node = root,
@@ -135,7 +128,7 @@ namespace Unity.HLODSystem
                 Name = "",
                 TargetGameObjects = new List<GameObject>(),
                 Distances = new List<int>(),
-                
+
             });
 
             while (travelQueue.Count > 0)
@@ -150,7 +143,7 @@ namespace Unity.HLODSystem
                         Node = item.Node.GetChild(i),
                         Parent = currentNodeIndex,
                         Level = item.Level + 1,
-                        Name = item.Name + "_" + (i+1),
+                        Name = item.Name + "_" + (i + 1),
                         TargetGameObjects = new List<GameObject>(),
                         Distances = new List<int>(),
                     });
@@ -179,16 +172,15 @@ namespace Unity.HLODSystem
                 var distances = new List<int>();
                 var colliders = GetColliders(item.TargetGameObjects, minObjectSize);
 
-
                 for (int ti = 0; ti < item.TargetGameObjects.Count; ++ti)
                 {
                     var curRenderers = CreateUtils.GetMeshRenderers(item.TargetGameObjects[ti], minObjectSize, level);
                     var curDistance = item.Distances[ti];
-                    
+
                     meshRenderers.AddRange(curRenderers);
                     distances.AddRange(Enumerable.Repeat<int>(curDistance, curRenderers.Count));
                 }
-                
+
                 for (int mi = 0; mi < meshRenderers.Count; ++mi)
                 {
                     (var mr, var mf) = meshRenderers[mi];
@@ -201,9 +193,9 @@ namespace Unity.HLODSystem
                     info.Colliders.Add(colliders[ci].ToWorkingCollider(hlod));
                 }
             }
-            
+
             DisposableList<HLODBuildInfo> results = new DisposableList<HLODBuildInfo>();
-            
+
             for (int i = 0; i < buildInfoCandidates.Count; ++i)
             {
                 if (buildInfoCandidates[i].WorkingObjects.Count > 0)
@@ -215,7 +207,7 @@ namespace Unity.HLODSystem
                     buildInfoCandidates[i].Dispose();
                 }
             }
-            
+
             return results;
         }
 
@@ -230,7 +222,7 @@ namespace Unity.HLODSystem
 
                 sw.Reset();
                 sw.Start();
-                
+
                 hlod.ConvertedPrefabObjects.Clear();
                 hlod.GeneratedObjects.Clear();
 
@@ -244,8 +236,9 @@ namespace Unity.HLODSystem
                         "There is no SpaceSplitter. Please set the SpaceSplitter.",
                         "OK");
                     yield break;
-                    
+
                 }
+
                 List<SpaceNode> rootNodeList = spliter.CreateSpaceTree(bounds, hlod.ChunkSize, hlod.transform, hlodTargets, progress =>
                 {
                     EditorUtility.DisplayProgressBar("Bake HLOD", "Splitting space", progress * 0.25f);
@@ -267,12 +260,12 @@ namespace Unity.HLODSystem
                     yield break;
                 }
 
-                for ( int ri = 0; ri < rootNodeList.Count; ++ ri)
+                for (int ri = 0; ri < rootNodeList.Count; ++ri)
                 {
                     var rootNode = rootNodeList[ri];
-                    
+
                     using (DisposableList<HLODBuildInfo> buildInfos =
-                           CreateBuildInfo(hlod, rootNode, hlod.MinObjectSize))
+                           CreateBuildInfo(hlod, rootNode, 0))
                     {
                         if (buildInfos.Count == 0 || buildInfos[0].WorkingObjects.Count == 0)
                         {
@@ -288,7 +281,36 @@ namespace Unity.HLODSystem
                             new object[] { hlod.SimplifierOptions });
                         for (int i = 0; i < buildInfos.Count; ++i)
                         {
+                            int preCount = 0;
+                            for (int j = 0; j < buildInfos[i].WorkingObjects.Count; ++j)
+                            {
+                                var workingObject = buildInfos[i].WorkingObjects[j];
+                                if (workingObject.Mesh != null)
+                                {
+                                    preCount += workingObject.Mesh.vertexCount;
+                                }
+                            }
+
                             yield return new BranchCoroutine(simplifier.Simplify(buildInfos[i]));
+
+                            int postCount = 0;
+                            for (int j = 0; j < buildInfos[i].WorkingObjects.Count; ++j)
+                            {
+                                var workingObject = buildInfos[i].WorkingObjects[j];
+                                if (workingObject.Mesh != null)
+                                {
+                                    postCount += workingObject.Mesh.vertexCount;
+                                }
+                            }
+
+                            if(postCount != preCount)
+                            {
+                                Debug.Log($"[HLOD] Simplify: {buildInfos[i].Name} {preCount} -> {postCount}");
+                            }
+                            else
+                            {
+                                Debug.Log($"[HLOD] Simplify: {buildInfos[i].Name} No change");
+                            }
                         }
 
                         yield return new WaitForBranches(progress =>
@@ -344,7 +366,7 @@ namespace Unity.HLODSystem
                         sw.Start();
                     }
                 }
-                
+
                 UserDataSerialization(hlod);
                 EditorUtility.SetDirty(hlod);
                 EditorUtility.SetDirty(hlod.gameObject);
@@ -353,9 +375,9 @@ namespace Unity.HLODSystem
             finally
             {
                 EditorUtility.ClearProgressBar();
-                
+
             }
-            
+
         }
 
         public static IEnumerator Destroy(HLOD hlod)
@@ -409,7 +431,7 @@ namespace Unity.HLODSystem
             {
                 EditorUtility.ClearProgressBar();
             }
-            
+
             EditorUtility.SetDirty(hlod.gameObject);
             EditorUtility.SetDirty(hlod);
         }
@@ -421,12 +443,12 @@ namespace Unity.HLODSystem
 
             if (serializer == null)
                 return;
-            
+
             hlod.AddGeneratedResource(serializer);
 
             var controllers = hlod.GetHLODControllerBases();
             if (controllers.Count == 0)
-                 return;
+                return;
 
             foreach (var controller in controllers)
             {
@@ -438,6 +460,5 @@ namespace Unity.HLODSystem
                 }
             }
         }
-
     }
 }

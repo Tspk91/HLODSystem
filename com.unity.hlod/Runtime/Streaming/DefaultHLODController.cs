@@ -10,7 +10,7 @@ namespace Unity.HLODSystem.Streaming
         [SerializeField]
         private List<GameObject> m_gameObjectList = new List<GameObject>();
         [SerializeField]
-        private List<GameObject> m_lowGameObjects = new List<GameObject>();
+        public List<GameObject> m_lowGameObjects = new List<GameObject>();
         
 
         public int AddHighObject(GameObject gameObject)
