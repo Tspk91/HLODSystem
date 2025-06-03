@@ -303,7 +303,7 @@ namespace Unity.HLODSystem
                                 }
                             }
 
-                            if(postCount != preCount)
+                            if (postCount != preCount)
                             {
                                 Debug.Log($"[HLOD] Simplify: {buildInfos[i].Name} {preCount} -> {postCount}");
                             }
@@ -371,6 +371,11 @@ namespace Unity.HLODSystem
                 EditorUtility.SetDirty(hlod);
                 EditorUtility.SetDirty(hlod.gameObject);
 
+                List<IHLODPostProcessor> postProcessors = hlod.GetComponents<MonoBehaviour>().Where(x => x is IHLODPostProcessor).Select(x => (IHLODPostProcessor)x).ToList();
+                foreach (var postProcessor in postProcessors)
+                {
+                    postProcessor.PostProcessHLOD();
+                }
             }
             finally
             {
@@ -460,5 +465,9 @@ namespace Unity.HLODSystem
                 }
             }
         }
+    }
+    public interface IHLODPostProcessor
+    {
+        void PostProcessHLOD();
     }
 }
