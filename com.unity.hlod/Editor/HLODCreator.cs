@@ -372,6 +372,10 @@ namespace Unity.HLODSystem
                 EditorUtility.SetDirty(hlod.gameObject);
 
                 List<IHLODPostProcessor> postProcessors = hlod.GetComponents<MonoBehaviour>().Where(x => x is IHLODPostProcessor).Select(x => (IHLODPostProcessor)x).ToList();
+                if (postProcessors.Count == 0)
+                {
+                    postProcessors = hlod.gameObject.GetComponentsInParent<MonoBehaviour>().Where(x => x is IHLODPostProcessor).Select(x => (IHLODPostProcessor)x).ToList();
+                }
                 foreach (var postProcessor in postProcessors)
                 {
                     postProcessor.PostProcessHLOD();
