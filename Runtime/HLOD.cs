@@ -127,7 +127,6 @@ namespace Unity.HLODSystem
         }
 
         
-#if UNITY_EDITOR
         public List<Object> GeneratedObjects
         {
             get { return m_generatedObjects; }
@@ -138,6 +137,7 @@ namespace Unity.HLODSystem
             get { return m_convertedPrefabObjects; }
         }
 
+// #if UNITY_EDITOR
         public List<HLODControllerBase> GetHLODControllerBases()
         {
             List<HLODControllerBase> controllerBases = new List<HLODControllerBase>();
@@ -161,6 +161,7 @@ namespace Unity.HLODSystem
             }
             return controllerBases;
         }
+// #endif
 
 
         Bounds CalcLocalBounds(Renderer renderer, Vector3 localPos)
@@ -170,7 +171,6 @@ namespace Unity.HLODSystem
 
             return bounds;
         }
-#endif
         public Bounds GetBounds()
         {
             Bounds ret = new Bounds();
