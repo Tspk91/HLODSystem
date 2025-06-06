@@ -23,7 +23,7 @@ namespace Unity.HLODSystem.Simplifier
         protected override IEnumerator GetSimplifiedMesh(Utils.WorkingMesh origin, float quality, Action<Utils.WorkingMesh> resultCallback)
         {
             string name = origin.name;
-            var meshSimplifier = new global::UnityMeshSimplifier.MeshSimplifierWhin();
+            var meshSimplifier = new global::UnityMeshSimplifier.MeshSimplifier();
             m_options.PreserveBorderEdges = true;
             m_options.PreserveUVSeamEdges = true;
             m_options.PreserveUVFoldoverEdges = false;
