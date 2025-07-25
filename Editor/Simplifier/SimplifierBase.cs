@@ -21,19 +21,20 @@ namespace Unity.HLODSystem.Simplifier
             {
                 Utils.WorkingMesh mesh = buildInfo.WorkingObjects[i].Mesh;
 
-                int triangleCount = mesh.triangles.Length / 3;
+                int triangleCount = mesh.triangles.Length/* / 3*/;
                 float minQuality = Mathf.Max((float)m_options.SimplifyMinPolygonCount / (float)triangleCount, 0.0f);
-
+                minQuality = 0;
                 float ratio = 1;
                 int distance = buildInfo.Distances[i] - 1;
-                if (distance <= 0)
+                if (distance < 0)
                     ratio = 1;
                 else
-                    ratio = Mathf.Pow((float)m_options.SimplifyPolygonRatio, buildInfo.Distances[i]-1);
+                    ratio = Mathf.Pow((float)m_options.SimplifyPolygonRatio, buildInfo.Distances[i]);
 
                 ratio = Mathf.Max(ratio, minQuality);
 
-                yield return GetSimplifiedMesh(mesh, ratio, (m) =>
+                Debug.Log($"Simplifying with ratio {ratio} (distance: {distance})");
+                    yield return GetSimplifiedMesh(mesh, ratio, (m) =>
                 {
                     buildInfo.WorkingObjects[i].SetMesh(m);
                 });
