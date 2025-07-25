@@ -24,7 +24,7 @@ namespace Unity.HLODSystem.Simplifier
         {
             string name = origin.name;
             var meshSimplifier = new global::UnityMeshSimplifier.MeshSimplifier();
-            m_options.PreserveBorderEdges = true;
+            // m_options.PreserveBorderEdges = true;
             m_options.PreserveUVSeamEdges = true;
             m_options.PreserveUVFoldoverEdges = false;
             m_options.EnableSmartLink = true;
