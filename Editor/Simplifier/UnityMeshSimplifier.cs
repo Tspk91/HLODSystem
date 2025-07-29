@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections;
 using Unity.Collections;
 using Unity.HLODSystem.Utils;
@@ -25,9 +25,9 @@ namespace Unity.HLODSystem.Simplifier
             string name = origin.name;
             var meshSimplifier = new global::UnityMeshSimplifier.MeshSimplifier();
             // m_options.PreserveBorderEdges = true;
-            m_options.PreserveUVSeamEdges = true;
-            m_options.PreserveUVFoldoverEdges = false;
-            m_options.EnableSmartLink = true;
+            // m_options.PreserveUVSeamEdges = true;
+            // m_options.PreserveUVFoldoverEdges = false;
+            // m_options.EnableSmartLink = true;
 
             meshSimplifier.SimplificationOptions = new global::UnityMeshSimplifier.SimplificationOptions
             {
